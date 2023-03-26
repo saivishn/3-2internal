@@ -1,0 +1,87 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+
+#define MAX_NODES 100
+#define MAX_EDGES 1000
+
+struct Edge {
+    int u, v, weight;
+};
+
+struct Graph {
+    int V, E;
+    struct Edge edges[MAX_EDGES];
+};
+
+void BellmanFord(struct Graph graph, int source, int dist[], int pred[]) {
+    int V = graph.V;
+    int E = graph.E;
+
+    // Initialize distance and predecessor arrays
+    for (int i = 0; i < V; i++) {
+        dist[i] = INT_MAX;
+        pred[i] = -1;
+    }
+    dist[source] = 0;
+
+    // Relax all edges V-1 times
+    for (int i = 1; i < V; i++) {
+        for (int j = 0; j < E; j++) {
+            int u = graph.edges[j].u;
+            int v = graph.edges[j].v;
+            int weight = graph.edges[j].weight;
+            if (dist[u] != INT_MAX && dist[u] + weight < dist[v]) {
+                dist[v] = dist[u] + weight;
+                pred[v] = u;
+            }
+        }
+    }
+
+    // Check for negative-weight cycles
+    for (int i = 0; i < E; i++) {
+        int u = graph.edges[i].u;
+        int v = graph.edges[i].v;
+        int weight = graph.edges[i].weight;
+        if (dist[u] != INT_MAX && dist[u] + weight < dist[v]) {
+            printf("Graph contains negative-weight cycle\n");
+            return;
+        }
+    }
+}
+
+int main() {
+    struct Graph graph;
+    int V, E, source;
+    int dist[MAX_NODES], pred[MAX_NODES];
+
+    printf("Enter number of vertices: ");
+    scanf("%d", &V);
+    printf("Enter number of edges: ");
+    scanf("%d", &E);
+
+    graph.V = V;
+    graph.E = E;
+
+    printf("Enter the edges and their weights (u v weight):\n");
+    for (int i = 0; i < E; i++) {
+        scanf("%d %d %d", &graph.edges[i].u, &graph.edges[i].v, &graph.edges[i].weight);
+    }
+
+    printf("Enter source vertex: ");
+    scanf("%d", &source);
+
+    BellmanFord(graph, source, dist, pred);
+
+    printf("Vertex\t Distance\tPredecessor\n");
+    for (int i = 0; i < V; i++) {
+        printf("%d\t %d\t\t", i, dist[i]);
+        if (pred[i] == -1) {
+            printf("N/A\n");
+        } else {
+            printf("%d\n", pred[i]);
+        }
+    }
+
+    return 0;
+}
